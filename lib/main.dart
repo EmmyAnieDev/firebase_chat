@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'notification.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -15,6 +16,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  NotificationHandler().initMessaging();
   runApp(const MyApp());
 }
 
@@ -40,9 +42,9 @@ class MyApp extends StatelessWidget {
             WelcomeScreen.id: (context) => const WelcomeScreen(),
             LoginScreen.id: (context) => const LoginScreen(),
             RegisterScreen.id: (context) => const RegisterScreen(),
+            ChatListScreen.id: (context) => const ChatListScreen(),
             MessageScreen.id: (context) =>
                 const MessageScreen(receiverUserName: '', generateChatId: ''),
-            ChatListScreen.id: (context) => const ChatListScreen(),
             GroupScreen.id: (context) =>
                 const GroupScreen(participantsUserName: ''),
           },

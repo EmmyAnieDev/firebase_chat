@@ -43,10 +43,14 @@ dependencies:
   modal_progress_hud_nsn: ^0.4.0
   image_picker: ^1.0.6
   uuid: ^4.3.1
-  dio: ^4.0.0
-  image_gallery_saver: ^2.0.3
+  open_file: ^3.3.2
   cached_network_image: ^3.3.1
-  #gallery_saver: ^2.0.1
+  http: ^0.13.6
+  path: ^1.8.3
+  path_provider: ^2.1.2
+  firebase_messaging: ^14.7.21
+  flutter_local_notifications: ^17.0.0
+
 
 dev_dependencies:
   flutter_test:

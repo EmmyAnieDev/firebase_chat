@@ -1,6 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'dart:io';
+import 'dart:core';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +11,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-//import 'package:gallery_saver/gallery_saver.dart';
-import 'package:dio/dio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'package:open_file/open_file.dart';
 
 final _firestore = FirebaseFirestore.instance;
 
@@ -473,24 +475,24 @@ class FullScreenImage extends StatelessWidget {
                 ),
               ),
             ),
-            // Container(
-            //   color: Colors.black.withOpacity(0.6),
-            //   padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.center,
-            //     children: [
-            //       ElevatedButton(
-            //         onPressed: () async {
-            //           await saveImageToGallery(imageUrl);
-            //         },
-            //         child: Text(
-            //           'Save to Gallery',
-            //           style: TextStyle(fontSize: 17.sp, color: Colors.black),
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
+            Container(
+              color: Colors.black.withOpacity(0.6),
+              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      await saveImageToGallery(context, imageUrl);
+                    },
+                    child: Text(
+                      'Save to Gallery',
+                      style: TextStyle(fontSize: 17.sp, color: Colors.black),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Container(
               color: Colors.black.withOpacity(0.6),
               padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
@@ -509,31 +511,33 @@ class FullScreenImage extends StatelessWidget {
     );
   }
 
-  // Function to save the image to the gallery
-  // Future<void> saveImageToGallery(String imageUrl) async {
-  //   try {
-  //     var response = await Dio().get(
-  //       imageUrl,
-  //       options: Options(responseType: ResponseType.bytes),
-  //     );
-  //     print('Image URL: $imageUrl');
-  //
-  //     final result = await GallerySaver.saveImage(
-  //       Uint8List.fromList(response.data),
-  //       albumName: 'YourAlbumName', // Provide your desired album name
-  //       isReturnImagePathOfIOS: true,
-  //     );
-  //
-  //     if (result != null && result.isNotEmpty) {
-  //       // Image saved successfully
-  //       print('Image saved to gallery: $result');
-  //     } else {
-  //       // Failed to save image
-  //       print('Failed to save image to gallery.');
-  //     }
-  //   } catch (e) {
-  //     // Handle errors
-  //     print('Error saving image to gallery: $e');
-  //   }
-  // }
+  Future<void> saveImageToGallery(BuildContext context, String imageUrl) async {
+    try {
+      // Save the image to the gallery
+      var response = await http.get(Uri.parse(imageUrl));
+      Directory? externalStorageDirectory = await getExternalStorageDirectory();
+      File file = File(
+          path.join(externalStorageDirectory!.path, path.basename(imageUrl)));
+      await file.writeAsBytes(response.bodyBytes);
+
+      print('File saved to: ${file.path}');
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Image saved successfully!'),
+          content: GestureDetector(
+            onTap: () {
+              OpenFile.open(file.path);
+            },
+            child: Image.file(File(file.path)),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving image to gallery: $e');
+      }
+    }
+  }
 }
